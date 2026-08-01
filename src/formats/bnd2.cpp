@@ -104,7 +104,7 @@ bool Bnd2::Load(binaryio::BinaryReader &reader)
 			e.descriptors[j].onDiskAlignment = 1 << (onDiskSize >> 28);
 		}
 
-		auto dataReader = reader.Copy();
+		auto dataReader = reader;
 		for (auto j = 0; j < blocks; j++)
 		{
 			dataReader.Seek(fileBlockOffsets[j] + reader.Read<uint32_t>()); // Read offset

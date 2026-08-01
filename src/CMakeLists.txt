@@ -17,13 +17,13 @@ add_library(libbndl ${SRC_FILES})
 target_sources(libbndl PUBLIC FILE_SET HEADERS
                               BASE_DIRS "${HEADER_DIR}"
                               FILES "${PUBLIC_HEADERS}")
-set_source_files_properties(${HEADER_DIR}/bundle.h PROPERTIES LANGUAGE C
-                                                              HEADER_FILE_ONLY ON)
+set_source_files_properties("${HEADER_DIR}/bundle.h" PROPERTIES LANGUAGE C
+                                                                HEADER_FILE_ONLY ON)
 
 FetchContent_Declare(
     binaryio
-    GIT_REPOSITORY https://github.com/Bo98/libbinaryio
-    GIT_TAG        2a95966233e818cf5c0990d6bf338da4afc81c7e
+    GIT_REPOSITORY https://github.com/Bo98/binaryio
+    GIT_TAG        2f169490c7346007e8d3c101031debab61fa804f
     SYSTEM
     EXCLUDE_FROM_ALL
     FIND_PACKAGE_ARGS
@@ -45,7 +45,9 @@ FetchContent_Declare(
     FIND_PACKAGE_ARGS 1.11
 )
 
-set(ZLIB_BUILD_SHARED ${BUILD_SHARED_LIBS})
+if(NOT DEFINED ZLIB_BUILD_SHARED)
+    set(ZLIB_BUILD_SHARED ${BUILD_SHARED_LIBS})
+endif()
 set(ZLIB_BUILD_TESTING OFF)
 FetchContent_MakeAvailable(binaryio ZLIB pugixml)
 if(NOT ZLIB_FOUND AND NOT BUILD_SHARED_LIBS)
@@ -56,7 +58,7 @@ target_link_libraries(libbndl PRIVATE binaryio ZLIB::ZLIB)
 if(TARGET pugixml::pugixml)
     target_link_libraries(libbndl PRIVATE pugixml::pugixml)
 else()
-    target_include_directories(libbndl SYSTEM PRIVATE ${pugixml_SOURCE_DIR}/src)
+    target_include_directories(libbndl SYSTEM PRIVATE "${pugixml_SOURCE_DIR}/src")
     target_compile_definitions(libbndl PRIVATE PUGIXML_HEADER_ONLY PUGIXML_NO_XPATH)
 endif()
 
@@ -69,7 +71,7 @@ set_target_properties(libbndl PROPERTIES PREFIX ""
 
 generate_export_header(libbndl EXPORT_FILE_NAME include/libbndl/internal/export.h)
 
-target_include_directories(libbndl PUBLIC ${LIBBNDL_ROOT}/include ${CMAKE_CURRENT_BINARY_DIR}/include)
+target_include_directories(libbndl PUBLIC "${LIBBNDL_ROOT}/include" "${CMAKE_CURRENT_BINARY_DIR}/include")
 
 if(MSVC)
     target_compile_options(libbndl PRIVATE "/W4" "/Zc:throwingNew" "/EHsc")
@@ -80,8 +82,8 @@ if(CMAKE_CXX_LINKER_SUPPORTS_PDB AND BUILD_SHARED_LIBS)
     install(FILES $<TARGET_PDB_FILE:libbndl> TYPE BIN OPTIONAL)
 endif()
 
-include(GNUInstallDirs) # `TYPE DOC` behaviour changes(!) when GNUInstallDirs is included
-install(FILES ${LIBBNDL_ROOT}/LICENSE.md TYPE DOC RENAME copyright)
+include(GNUInstallDirs)
+install(FILES "${LIBBNDL_ROOT}/LICENSE.md" TYPE DOC RENAME copyright)
 
 if(NOT ZLIB_FOUND AND ZLIB_BUILD_SHARED)
     install(TARGETS zlib ARCHIVE EXCLUDE_FROM_ALL)

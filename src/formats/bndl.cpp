@@ -18,7 +18,7 @@ bool Bndl::Load(binaryio::BinaryReader &reader)
 		return false;
 
 	m_platform = static_cast<Platform>(0);
-	auto platformReader = reader.Copy();
+	auto platformReader = reader;
 	for (const auto offset : { 0x4C, 0x58, 0x64 })
 	{
 		platformReader.Seek(offset);
@@ -115,7 +115,7 @@ bool Bndl::Load(binaryio::BinaryReader &reader)
 			}
 		}
 
-		auto dataReader = reader.Copy();
+		auto dataReader = reader;
 		auto dataBlockStartOffset = 0;
 		for (uint8_t j = 0; j < blocks; j++)
 		{
