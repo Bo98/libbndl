@@ -89,7 +89,7 @@ namespace libbndl
 			[[nodiscard]] Buffer GetBinary(ResourceKey resourceKey, MemoryType memoryType) const;
 
 			bool AddResource(ResourceKey resourceKey, const Resource &data);
-			bool AddResourceDebugData(ResourceKey resourceID, const std::string &name, const std::string &type);
+			bool AddResourceDebugData(ResourceKey resourceID, std::string name, std::string typeName);
 
 			bool ReplaceResource(ResourceKey resourceKey, const Resource &data);
 

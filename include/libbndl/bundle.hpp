@@ -1,6 +1,7 @@
 #pragma once
 #include <libbndl/internal/export.h>
 #include <array>
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <optional>
@@ -150,7 +151,7 @@ namespace libbndl
 		constexpr ResourceID() noexcept : m_id(0) {}
 		constexpr ResourceID(uint32_t id, uint16_t type, uint8_t index, IDType idType) noexcept
 			: m_id(id | (static_cast<uint64_t>(type) << 32) | (static_cast<uint64_t>(index) << 48) || (static_cast<uint64_t>(idType) << 56)) {}
-		LIBBNDL_EXPORT explicit ResourceID(const std::string &name) noexcept;
+		LIBBNDL_EXPORT explicit ResourceID(std::string name) noexcept;
 		constexpr explicit ResourceID(UnderlyingType id) noexcept : m_id(id) {}
 
 		[[nodiscard]] constexpr bool operator==(const ResourceID &id) const noexcept = default;
@@ -195,8 +196,8 @@ namespace libbndl
 
 		constexpr Import(ResourceID resourceID, uint32_t offset, ImportType type = ImportType::Pointer) noexcept
 			: m_resourceID(resourceID), m_offset(offset | (static_cast<uint32_t>(type) << 31)) {}
-		Import(const std::string &resourceName, uint32_t offset, ImportType type = ImportType::Pointer) noexcept
-			: Import(ResourceID(resourceName), offset, type) {}
+		Import(std::string resourceName, uint32_t offset, ImportType type = ImportType::Pointer) noexcept
+			: Import(ResourceID(std::move(resourceName)), offset, type) {}
 
 		[[nodiscard]] constexpr ResourceID GetResourceID() const noexcept { return m_resourceID; }
 		[[nodiscard]] constexpr uint32_t GetOffset() const noexcept { return m_offset & 0x7FFFFFFF; }
@@ -273,8 +274,8 @@ namespace libbndl
 		LIBBNDL_EXPORT Bundle(Magic magic, uint16_t version, Platform platform, Flags flags);
 		LIBBNDL_EXPORT ~Bundle();
 
-		LIBBNDL_EXPORT bool Load(const std::string &name);
-		LIBBNDL_EXPORT bool Save(const std::string &name);
+		LIBBNDL_EXPORT bool Load(const std::filesystem::path &name);
+		LIBBNDL_EXPORT bool Save(const std::filesystem::path &name);
 
 		[[nodiscard]] LIBBNDL_EXPORT Magic GetMagic() const;
 		[[nodiscard]] LIBBNDL_EXPORT uint16_t GetVersion() const;

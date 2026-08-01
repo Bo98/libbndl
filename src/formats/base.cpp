@@ -6,6 +6,7 @@
 #include <regex>
 #include <pugixml.hpp>
 #include <zlib.h>
+#include <binaryio/binaryreader.hpp>
 
 using namespace libbndl;
 using namespace libbndl::Formats;
@@ -94,15 +95,15 @@ bool Base::AddResource(ResourceKey resourceKey, const Resource &resource)
 	return ReplaceResource(resourceKey, resource);
 }
 
-bool Base::AddResourceDebugData(ResourceKey resourceKey, const std::string &name, const std::string &type)
+bool Base::AddResourceDebugData(ResourceKey resourceKey, std::string name, std::string typeName)
 {
 	const auto it = m_debugDataEntries.find(resourceKey);
 	if (it != m_debugDataEntries.end())
 		return false;
 
 	auto &debugData = it->second;
-	debugData.name = name;
-	debugData.typeName = type;
+	debugData.name = std::move(name);
+	debugData.typeName = std::move(typeName);
 
 	return true;
 }
