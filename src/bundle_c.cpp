@@ -211,7 +211,7 @@ libbndl_error libbndl_get_resource_type(const libbndl_bundle *LIBBNDL_NONNULL bu
 struct libbndl_buffer : public Buffer
 {
 	using Buffer::Buffer;
-	LIBBNDL_DEFAULT_MOVE_CONSTEXPR libbndl_buffer(Buffer &&buffer) : Buffer(std::move(buffer)) {}
+	LIBBNDL_BUFFER_CONSTEXPR libbndl_buffer(Buffer &&buffer) : Buffer(std::move(buffer)) {}
 };
 
 libbndl_error libbndl_buffer_create(libbndl_buffer *LIBBNDL_NULLABLE *LIBBNDL_NONNULL buffer, const void *LIBBNDL_NONNULL data, size_t size, uint32_t alignment)
@@ -270,7 +270,7 @@ uint32_t libbndl_buffer_get_alignment(const libbndl_buffer *LIBBNDL_NONNULL buff
 struct libbndl_import : public Import
 {
 	using Import::Import;
-	constexpr libbndl_import(Import &&import) : Import(std::move(import)) {}
+	constexpr libbndl_import(const Import &import) : Import(import) {}
 };
 
 libbndl_error libbndl_import_create(libbndl_import *LIBBNDL_NULLABLE *LIBBNDL_NONNULL import, libbndl_resource_id resourceID, uint32_t offset, libbndl_import_type importType)
@@ -307,7 +307,7 @@ libbndl_import_type libbndl_import_get_import_type(const libbndl_import *LIBBNDL
 struct libbndl_resource : public Resource
 {
 	using Resource::Resource;
-	LIBBNDL_DEFAULT_MOVE_CONSTEXPR libbndl_resource(Resource &&resource) : Resource(std::move(resource)) {}
+	libbndl_resource(Resource &&resource) : Resource(std::move(resource)) {}
 };
 
 libbndl_error libbndl_resource_create(libbndl_resource *LIBBNDL_NULLABLE *LIBBNDL_NONNULL resource, libbndl_resource_type resourceType)
@@ -374,7 +374,7 @@ libbndl_error libbndl_resource_copy_import(const libbndl_resource *LIBBNDL_NONNU
 	if (index >= imports.size())
 		return LIBBNDL_ERROR_OUT_OF_RANGE;
 
-	*import = new libbndl_import(std::move(imports[index]));
+	*import = new libbndl_import(imports[index]);
 	if (*import == nullptr)
 		return LIBBNDL_ERROR_MEMORY_ALLOCATION;
 
@@ -446,7 +446,7 @@ libbndl_error libbndl_get_resource_id_at_index(const libbndl_bundle *LIBBNDL_NON
 bool libbndl_is_populated_resource_stream_index(const libbndl_bundle *LIBBNDL_NONNULL bundle, libbndl_resource_id resourceID, uint8_t streamIndex)
 {
 	const auto indices = bundle->GetResourceStreamIndices(ResourceID(resourceID));
-	return std::find(indices.begin(), indices.end(), streamIndex) != indices.end();
+	return std::ranges::find(indices, streamIndex) != indices.end();
 }
 
 libbndl_resource_id libbndl_get_default_resource_id(const libbndl_bundle *LIBBNDL_NONNULL bundle)
@@ -470,5 +470,5 @@ libbndl_error libbndl_get_stream_name(const libbndl_bundle *LIBBNDL_NONNULL bund
 bool libbndl_is_valid_memory_type(const libbndl_bundle *LIBBNDL_NONNULL bundle, libbndl_memory_type memoryType)
 {
 	const auto memoryTypes = bundle->GetMemoryTypes();
-	return std::find(memoryTypes.begin(), memoryTypes.end(), static_cast<MemoryType>(memoryType)) != memoryTypes.end();
+	return std::ranges::find(memoryTypes, static_cast<MemoryType>(memoryType)) != memoryTypes.end();
 }

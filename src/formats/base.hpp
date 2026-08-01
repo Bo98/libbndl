@@ -73,6 +73,10 @@ namespace libbndl
 		public:
 			Base() = default;
 			Base(uint16_t version, Platform platform, Flags flags);
+			Base(const Base &) = delete;
+			Base &operator=(const Base &) = delete;
+			Base(Base &&) = delete;
+			Base &operator=(Base &&) = delete;
 			virtual ~Base() = default;
 
 			virtual bool Load(binaryio::BinaryReader &reader) = 0;
@@ -114,15 +118,15 @@ namespace libbndl
 			Platform m_platform;
 			Flags m_flags;
 
-			virtual constexpr bool AppendsImportsToResource() const = 0;
-			virtual bool IsValidPlatform() const;
+			[[nodiscard]] virtual constexpr bool AppendsImportsToResource() const = 0;
+			[[nodiscard]] virtual bool IsValidPlatform() const;
 
-			std::endian GetPlatformEndian() const;
+			[[nodiscard]] std::endian GetPlatformEndian() const;
 
 			void ParseDebugData(const std::string &rstXML);
 			[[nodiscard]] std::string GenerateDebugData() const;
-			virtual std::vector<ResourceKey> SortedDebugDataKeys() const;
-			virtual std::vector<std::pair<std::string, std::string>> GetDebugDataAttributes(const ResourceKey &resourceKey, const ResourceDebugDataEntry &debugData) const;
+			[[nodiscard]] virtual std::vector<ResourceKey> SortedDebugDataKeys() const;
+			[[nodiscard]] virtual std::vector<std::pair<std::string, std::string>> GetDebugDataAttributes(const ResourceKey &resourceKey, const ResourceDebugDataEntry &debugData) const;
 
 			[[nodiscard]] static ImportEntry ReadImport(binaryio::BinaryReader &reader);
 			static void WriteImport(binaryio::BinaryWriter &writer, const Import &import);

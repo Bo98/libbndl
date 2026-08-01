@@ -17,7 +17,7 @@ bool Bndl::Load(binaryio::BinaryReader &reader)
 	if (version < 3 || version > 5)
 		return false;
 
-	m_platform = static_cast<Platform>(0);
+	std::optional<Platform> detectedPlatform;
 	auto platformReader = reader;
 	for (const auto offset : { 0x4C, 0x58, 0x64 })
 	{
@@ -25,12 +25,13 @@ bool Bndl::Load(binaryio::BinaryReader &reader)
 		const auto platform = static_cast<Platform>(platformReader.Read<uint32_t>());
 		if (platform == Platform::PC || platform == Platform::Xbox360 || platform == Platform::PS3)
 		{
-			m_platform = platform;
+			detectedPlatform = platform;
 			break;
 		}
 	}
-	if (m_platform == static_cast<Platform>(0))
+	if (!detectedPlatform.has_value())
 		return false;
+	m_platform = *detectedPlatform;
 
 	const auto numEntries = reader.Read<uint32_t>();
 
@@ -46,7 +47,7 @@ bool Bndl::Load(binaryio::BinaryReader &reader)
 		reader.Skip<uint32_t>(); // Alignment
 	}
 
-	reader.Seek(0x4 * blocks, std::ios::cur); // memory address stuff
+	reader.Seek(static_cast<std::streamoff>(0x4) * blocks, std::ios::cur); // memory address stuff
 
 	const auto idListOffset = reader.Read<uint32_t>();
 	const auto idTableOffset = reader.Read<uint32_t>();
@@ -82,8 +83,9 @@ bool Bndl::Load(binaryio::BinaryReader &reader)
 
 	reader.Seek(idListOffset);
 	std::vector<ResourceID> resourceIDs;
+	resourceIDs.reserve(numEntries);
 	for (auto i = 0U; i < numEntries; i++)
-		resourceIDs.push_back(ResourceID(reader.Read<uint64_t>()));
+		resourceIDs.emplace_back(reader.Read<uint64_t>());
 
 	reader.Seek(idTableOffset);
 	for (const auto resourceID : resourceIDs)
@@ -116,7 +118,7 @@ bool Bndl::Load(binaryio::BinaryReader &reader)
 		}
 
 		auto dataReader = reader;
-		auto dataBlockStartOffset = 0;
+		uint32_t dataBlockStartOffset = 0;
 		for (uint8_t j = 0; j < blocks; j++)
 		{
 			if (j > 0)
@@ -145,7 +147,7 @@ bool Bndl::Load(binaryio::BinaryReader &reader)
 			descriptor.data = std::unique_ptr<uint8_t[]>(dataReader.Read<uint8_t *>(descriptor.onDiskSize));
 		}
 
-		reader.Seek(0x4 * blocks, std::ios::cur); // memory address stuff
+		reader.Seek(static_cast<std::streamoff>(0x4) * blocks, std::ios::cur); // memory address stuff
 	}
 
 	if (compressed)
@@ -198,7 +200,7 @@ bool Bndl::Load(binaryio::BinaryReader &reader)
 	auto rstXML = rstReader.ReadString(strLen);
 
 	// Cover Criterion's broken XML writer.
-	if (rstXML.rfind("</ResourceStringTable>", 0) == 0)
+	if (rstXML.starts_with("</ResourceStringTable>"))
 		rstXML.erase(1, 1);
 	const auto pos = rstXML.find("</ResourceStringTable>\n\t");
 	if (pos != std::string::npos)
@@ -472,6 +474,9 @@ std::optional<uint8_t> Bndl::MapFileBlockToLibBlock(uint8_t block) const
 	case 5:
 		if (m_platform == Platform::PS3)
 			mappedType = MemoryType::GraphicsLocal;
+		break;
+	default:
+		assert(false);
 		break;
 	}
 

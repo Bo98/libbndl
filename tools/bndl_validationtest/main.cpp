@@ -3,23 +3,27 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <span>
 
-static bool identicalFiles(const std::filesystem::path &path1, const std::filesystem::path &path2)
+namespace
 {
-	std::ifstream file1(path1, std::ifstream::binary | std::ifstream::ate);
-	std::ifstream file2(path2, std::ifstream::binary | std::ifstream::ate);
+	bool identicalFiles(const std::filesystem::path &path1, const std::filesystem::path &path2)
+	{
+		std::ifstream file1(path1, std::ifstream::binary | std::ifstream::ate);
+		std::ifstream file2(path2, std::ifstream::binary | std::ifstream::ate);
 
-	if (file1.fail() || file2.fail()) {
-		return false;
+		if (file1.fail() || file2.fail()) {
+			return false;
+		}
+
+		if (file1.tellg() != file2.tellg()) {
+			return false;
+		}
+
+		file1.seekg(0, std::ifstream::beg);
+		file2.seekg(0, std::ifstream::beg);
+		return std::equal(std::istreambuf_iterator<char>(file1.rdbuf()), std::istreambuf_iterator<char>(), std::istreambuf_iterator<char>(file2.rdbuf()));
 	}
-
-	if (file1.tellg() != file2.tellg()) {
-		return false;
-	}
-
-	file1.seekg(0, std::ifstream::beg);
-	file2.seekg(0, std::ifstream::beg);
-	return std::equal(std::istreambuf_iterator<char>(file1.rdbuf()), std::istreambuf_iterator<char>(), std::istreambuf_iterator<char>(file2.rdbuf()));
 }
 
 int main(int argc, char **argv)
@@ -30,7 +34,9 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	const auto dir = std::filesystem::path(argv[1]);
+	auto args = std::span(argv, static_cast<size_t>(argc));
+
+	const auto dir = std::filesystem::path(args[1]);
 	if (!std::filesystem::is_directory(dir))
 	{
 		std::cerr << "Invalid directory\n";
@@ -47,14 +53,14 @@ int main(int argc, char **argv)
 		if (!std::filesystem::is_regular_file(entry))
 			continue;
 
-		const auto path = entry.path();
+		const auto &path = entry.path();
 
 		libbndl::Bundle bundle;
 
 		if (!bundle.Load(path.string()))
 		{
 			auto ext = path.extension().string();
-			std::transform(ext.begin(), ext.end(), ext.begin(), [](auto c) { return std::tolower(c, std::locale::classic()); });
+			std::ranges::transform(ext, ext.begin(), [](auto c) { return std::tolower(c, std::locale::classic()); });
 
 			// If it looks like a bundle let's be vocal about it
 			if (ext == ".bndl" || ext == ".bundle")

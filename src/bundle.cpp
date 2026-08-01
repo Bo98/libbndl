@@ -12,7 +12,7 @@ using namespace libbndl;
 
 ResourceID::ResourceID(std::string name) noexcept
 {
-	std::transform(name.begin(), name.end(), name.begin(), [](auto c) { return std::tolower(c, std::locale::classic()); });
+	std::ranges::transform(name, name.begin(), [](auto c) { return std::tolower(c, std::locale::classic()); });
 	m_id = crc32_z(0, reinterpret_cast<const Bytef *>(name.c_str()), name.length());
 }
 
@@ -30,10 +30,12 @@ Bundle::Bundle(Magic magic, uint16_t version, Platform platform, Flags flags)
 		m_impl = std::make_unique<Formats::Bnd2>(version, platform, flags);
 		break;
 	default:
-		throw new std::invalid_argument("Invalid magic number");
+		throw std::invalid_argument("Invalid magic number");
 	}
 }
 
+Bundle::Bundle(Bundle &&) noexcept = default;
+Bundle &Bundle::operator=(Bundle &&) noexcept = default;
 Bundle::~Bundle() = default;
 
 bool Bundle::Load(const std::filesystem::path &name)
@@ -149,7 +151,7 @@ bool Bundle::AddResource(ResourceID resourceID, const Resource &resource, uint8_
 
 bool Bundle::AddResourceDebugData(ResourceID resourceID, const ResourceDebugData &debugData, uint8_t streamIndex)
 {
-	return m_impl->AddResourceDebugData({ resourceID, streamIndex }, std::move(debugData.GetName()), std::move(debugData.GetTypeName()));
+	return m_impl->AddResourceDebugData({ resourceID, streamIndex }, debugData.GetName(), debugData.GetTypeName());
 }
 
 bool Bundle::ReplaceResource(ResourceID resourceID, const Resource &resource, uint8_t streamIndex)

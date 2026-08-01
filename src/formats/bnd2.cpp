@@ -148,11 +148,9 @@ bool Bnd2::Save(binaryio::BinaryWriter &writer)
 		return false;
 
 	// For version 2, only the first 4 flags are supported. 7 for version 3.
-	if (m_version == 2 && BitScanReverse(static_cast<uint32_t>(m_flags)) >= 4)
-		return false;
-	else if (m_version == 3 && BitScanReverse(static_cast<uint32_t>(m_flags)) >= 7)
-		return false;
-	else if (m_version == 5 && (m_flags & (Flags::MainMemOptimised | Flags::GraphicsMemOptimised)))
+	if ((m_version == 2 && BitScanReverse(static_cast<uint32_t>(m_flags)) >= 4) ||
+		(m_version == 3 && BitScanReverse(static_cast<uint32_t>(m_flags)) >= 7) ||
+		(m_version == 5 && (m_flags & (Flags::MainMemOptimised | Flags::GraphicsMemOptimised))))
 		return false;
 
 	if (!IsValidPlatform())
@@ -206,12 +204,15 @@ bool Bnd2::Save(binaryio::BinaryWriter &writer)
 		writer.Write<uint64_t>(m_defaultResourceID);
 		writer.Write(m_defaultResourceStreamIndex);
 
-		char buffer[15];
-		for (auto i = 0; i < kStreamLimit; i++)
+		std::array<char, 15> buffer;
+		for (const auto &streamName : m_streamNames)
 		{
-			std::memset(buffer, 0, 15);
-			std::memcpy(buffer, m_streamNames[i].c_str(), std::min(m_streamNames[i].size(), static_cast<size_t>(15)));
-			writer.Write(buffer, 15);
+			const auto length = std::min(streamName.size(), buffer.size());
+
+			std::memcpy(buffer.data(), streamName.data(), length);
+			std::ranges::fill(std::span{ buffer }.subspan(length), '\0');
+
+			writer.Write(buffer.data(), buffer.size());
 		}
 	}
 
@@ -234,7 +235,7 @@ bool Bnd2::Save(binaryio::BinaryWriter &writer)
 	std::vector<ResourceKey> sortedKeys{ keys.begin(), keys.end() };
 	if (m_version >= 3)
 	{
-		std::sort(sortedKeys.begin(), sortedKeys.end(), [this](const auto &a, const auto &b) {
+		std::ranges::sort(sortedKeys, [this](const auto &a, const auto &b) {
 			const auto &debugDataA = GetResourceDebugData(a);
 			const auto &debugDataB = GetResourceDebugData(b);
 
@@ -447,7 +448,7 @@ std::vector<MemoryType> Bnd2::GetMemoryTypes() const
 
 bool Bnd2::IsValidPlatform() const
 {
-	bool valid = Base::IsValidPlatform();
+	const auto valid = Base::IsValidPlatform();
 
 	if (m_version >= 5 && !valid)
 		return (m_platform == Platform::PSVita || m_platform == Platform::WiiU);
@@ -461,7 +462,7 @@ std::vector<ResourceKey> Bnd2::SortedDebugDataKeys() const
 
 	const auto keys = std::views::keys(m_debugDataEntries);
 	std::vector<ResourceKey> sortedKeys{ keys.begin(), keys.end() };
-	std::sort(sortedKeys.begin(), sortedKeys.end(), [this](const auto &a, const auto &b) {
+	std::ranges::sort(sortedKeys, [this](const auto &a, const auto &b) {
 		if (m_version < 5)
 		{
 			const auto &debugDataA = m_debugDataEntries.at(a);
@@ -486,7 +487,7 @@ std::vector<std::pair<std::string, std::string>> Bnd2::GetDebugDataAttributes(co
 
 	if (m_version >= 3)
 	{
-		if (m_entries.size() == 1 && m_defaultResourceStreamIndex == resourceKey.second && !(m_flags & Flags::Compressed)
+		if ((m_entries.size() == 1 && m_defaultResourceStreamIndex == resourceKey.second && !(m_flags & Flags::Compressed))
 			|| (m_version == 3 && debugData.name.ends_with(".xml")))
 		{
 			auto it = std::ranges::find(attributes, "id", &std::pair<std::string, std::string>::first);
@@ -558,6 +559,9 @@ std::optional<uint8_t> Bnd2::MapFileBlockToLibBlock(uint8_t block) const
 	case 3:
 		if (m_version >= 3 && (m_platform == Platform::PS3 || m_platform == Platform::PSVita || m_platform == Platform::WiiU))
 			mappedType = MemoryType::Disposable;
+		break;
+	default:
+		assert(false);
 		break;
 	}
 

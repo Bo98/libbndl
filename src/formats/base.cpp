@@ -11,12 +11,7 @@
 using namespace libbndl;
 using namespace libbndl::Formats;
 
-Base::Base(uint16_t version, Platform platform, Flags flags)
-{
-	m_version = version;
-	m_platform = platform;
-	m_flags = flags;
-}
+Base::Base(uint16_t version, Platform platform, Flags flags) : m_version(version), m_platform(platform), m_flags(flags) {}
 
 std::optional<ResourceDebugDataEntry> Base::GetResourceDebugData(ResourceKey resourceKey) const
 {
@@ -210,6 +205,7 @@ bool Base::ReplaceResource(ResourceKey resourceKey, const Resource &resource)
 std::vector<ResourceID> Base::GetResourceIDs() const
 {
 	std::vector<ResourceID> entries;
+	entries.reserve(m_entries.size());
 	for (const auto &e : m_entries)
 	{
 		entries.push_back(e.first.first);
@@ -374,9 +370,9 @@ std::vector<std::pair<std::string, std::string>> Base::GetDebugDataAttributes(co
 
 ImportEntry Base::ReadImport(binaryio::BinaryReader &reader)
 {
-	const ImportEntry &dep = {
-		ResourceID(reader.Read<uint64_t>()),
-		reader.Read<uint32_t>()
+	ImportEntry dep{
+		.resourceID = ResourceID(reader.Read<uint64_t>()),
+		.offset = reader.Read<uint32_t>()
 	};
 	reader.Skip<uint32_t>();
 	return dep;

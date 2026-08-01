@@ -1,7 +1,7 @@
 #pragma once
 #include <libbndl/bundle.hpp>
 
-std::map<uint32_t, std::string> g_burnoutFileTypeNames = {
+const std::map<uint32_t, std::string> g_burnoutFileTypeNames = {
 	{ libbndl::ResourceType::Burnout::Texture, "Texture" },
 	{ libbndl::ResourceType::Burnout::Material, "Material" },
 	{ libbndl::ResourceType::Burnout::RenderableMesh, "RenderableMesh" },
@@ -123,7 +123,7 @@ std::map<uint32_t, std::string> g_burnoutFileTypeNames = {
 	{ libbndl::ResourceType::Burnout::BkSoundBulletImpactStream, "BkSoundBulletImpactStream" },
 };
 
-std::map<uint32_t, std::string> g_nfsFileTypeNames = {
+const std::map<uint32_t, std::string> g_nfsFileTypeNames = {
 	{ libbndl::ResourceType::NeedForSpeed::Texture, "Texture" },
 	{ libbndl::ResourceType::NeedForSpeed::Material, "Material" },
 	{ libbndl::ResourceType::NeedForSpeed::VertexDescriptor, "VertexDescriptor" },

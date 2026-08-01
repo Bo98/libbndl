@@ -22,6 +22,17 @@
         "LIBBNDL_BUILD_TOOLS": "ON",
         "LIBBNDL_INSTALL_TOOLS": "ON",
         "LIBBNDL_BUILD_VALIDATIONTEST": "ON"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "enableMicrosoftCodeAnalysis": true,
+          "codeAnalysisRuleset": "${sourceDir}/libbndl.ruleset",
+          "disableExternalAnalysis": true,
+          "enableClangTidyCodeAnalysis": true
+        }
+      },
+      "environment": {
+        "CAExcludePath": "${sourceDir}/out/build/${presetName}/_deps"
       }
     },
     {
@@ -517,7 +528,7 @@
   ],
   "vendor": {
     "qt-project.org/Presets": {
-      "checksum": "gHC3Ye35P5d7RkRa5FRN6hZz3jo="
+      "checksum": "9ZhmNRipVo0D73DBdn2wVCPt4p4="
     }
   }
 }

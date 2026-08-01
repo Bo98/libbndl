@@ -10,32 +10,32 @@ namespace libbndl
 		public:
 			using Base::Base;
 
-			virtual bool Load(binaryio::BinaryReader &reader) override;
-			virtual bool Save(binaryio::BinaryWriter &reader) override;
+			bool Load(binaryio::BinaryReader &reader) override;
+			bool Save(binaryio::BinaryWriter &reader) override;
 
-			[[nodiscard]] virtual constexpr Magic GetMagic() const override { return Magic::Bnd2; }
+			[[nodiscard]] constexpr Magic GetMagic() const override { return Magic::Bnd2; }
 
-			[[nodiscard]] virtual std::optional<Resource> GetResource(ResourceKey resourceKey) const override;
+			[[nodiscard]] std::optional<Resource> GetResource(ResourceKey resourceKey) const override;
 
-			[[nodiscard]] virtual ResourceID GetDefaultResourceID() const override;
-			[[nodiscard]] virtual int32_t GetDefaultResourceStreamIndex() const override;
-			[[nodiscard]] virtual std::string GetStreamName(uint8_t index) const override;
+			[[nodiscard]] ResourceID GetDefaultResourceID() const override;
+			[[nodiscard]] int32_t GetDefaultResourceStreamIndex() const override;
+			[[nodiscard]] std::string GetStreamName(uint8_t index) const override;
 
-			[[nodiscard]] virtual std::vector<MemoryType> GetMemoryTypes() const override;
+			[[nodiscard]] std::vector<MemoryType> GetMemoryTypes() const override;
 
 		protected:
-			virtual constexpr bool AppendsImportsToResource() const override { return false; }
-			virtual bool IsValidPlatform() const override;
+			[[nodiscard]] constexpr bool AppendsImportsToResource() const override { return false; }
+			[[nodiscard]] bool IsValidPlatform() const override;
 
-			virtual std::vector<ResourceKey> SortedDebugDataKeys() const override;
-			virtual std::vector<std::pair<std::string, std::string>> GetDebugDataAttributes(const ResourceKey &resourceKey, const ResourceDebugDataEntry &debugData) const override;
+			[[nodiscard]] std::vector<ResourceKey> SortedDebugDataKeys() const override;
+			[[nodiscard]] std::vector<std::pair<std::string, std::string>> GetDebugDataAttributes(const ResourceKey &resourceKey, const ResourceDebugDataEntry &debugData) const override;
 
 		private:
 			ResourceID m_defaultResourceID;
 			int32_t m_defaultResourceStreamIndex;
 			std::array<std::string, kStreamLimit> m_streamNames;
 
-			std::optional<uint8_t> MapFileBlockToLibBlock(uint8_t block) const;
+			[[nodiscard]] std::optional<uint8_t> MapFileBlockToLibBlock(uint8_t block) const;
 		};
 	}
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="libbndl rules" Description="Microsoft Code Analysis rules for libbndl" ToolsVersion="17.0">
+  <Include Path="NativeRecommendedRules.ruleset" Action="Default" />
+  <Rules AnalyzerId="Microsoft.Analyzers.NativeCodeAnalysis" RuleNamespace="Microsoft.Rules.Native">
+	<Rule Id="C26495" Action="None" />
+  </Rules>
+</RuleSet>

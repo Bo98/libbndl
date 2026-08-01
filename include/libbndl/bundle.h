@@ -42,7 +42,7 @@ extern "C"
 	} libbndl_error;
 
 	enum {
-#define LIBBNDL_ENUM_MAGIC(_, name, value) LIBBNDL_MAGIC_##name = value,
+#define LIBBNDL_ENUM_MAGIC(_, name, value) LIBBNDL_MAGIC_##name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_MAGIC
 	};
@@ -50,7 +50,7 @@ extern "C"
 
 	enum
 	{
-#define LIBBNDL_ENUM_PLATFORM(_, name, value) LIBBNDL_PLATFORM_##name = value,
+#define LIBBNDL_ENUM_PLATFORM(_, name, value) LIBBNDL_PLATFORM_##name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_PLATFORM
 	};
@@ -58,7 +58,7 @@ extern "C"
 
 	enum
 	{
-#define LIBBNDL_ENUM_FLAGS(_, name, value) LIBBNDL_FLAGS_##name = value,
+#define LIBBNDL_ENUM_FLAGS(_, name, value) LIBBNDL_FLAGS_##name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_FLAGS
 	};
@@ -85,7 +85,7 @@ extern "C"
 
 	enum
 	{
-#define LIBBNDL_ENUM_ID_TYPE(_, name, value) LIBBNDL_RESOURCE_ID_TYPE_##name = value,
+#define LIBBNDL_ENUM_ID_TYPE(_, name, value) LIBBNDL_RESOURCE_ID_TYPE_##name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_ID_TYPE
 	};
@@ -119,13 +119,13 @@ extern "C"
 	/* Resource type */
 	enum
 	{
-#define LIBBNDL_ENUM_RESOURCE_TYPE_BURNOUT(_, name, value) LIBBNDL_RESOURCE_TYPE_BURNOUT_##name = value,
+#define LIBBNDL_ENUM_RESOURCE_TYPE_BURNOUT(_, name, value) LIBBNDL_RESOURCE_TYPE_BURNOUT_##name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_RESOURCE_TYPE_BURNOUT
 	};
 	enum
 	{
-#define LIBBNDL_ENUM_RESOURCE_TYPE_NFS(_, name, value) LIBBNDL_RESOURCE_TYPE_NFS_##name = value,
+#define LIBBNDL_ENUM_RESOURCE_TYPE_NFS(_, name, value) LIBBNDL_RESOURCE_TYPE_NFS_##name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_RESOURCE_TYPE_NFS
 	};
@@ -139,7 +139,7 @@ extern "C"
 
 	enum
 	{
-#define LIBBNDL_ENUM_MEMORY_TYPE(_, name, value) LIBBNDL_MEMORY_TYPE_##name = value,
+#define LIBBNDL_ENUM_MEMORY_TYPE(_, name, value) LIBBNDL_MEMORY_TYPE_##name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_MEMORY_TYPE
 	};
@@ -160,7 +160,7 @@ extern "C"
 
 	enum
 	{
-#define LIBBNDL_ENUM_IMPORT_TYPE(_, name, value) LIBBNDL_IMPORT_TYPE_##name = value,
+#define LIBBNDL_ENUM_IMPORT_TYPE(_, name, value) LIBBNDL_IMPORT_TYPE_##name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_IMPORT_TYPE
 	};

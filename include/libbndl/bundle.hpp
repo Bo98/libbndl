@@ -16,12 +16,6 @@
 #	define LIBBNDL_BUFFER_CONSTEXPR
 #endif
 
-#if __cpp_constexpr >= 202207L
-#	define LIBBNDL_DEFAULT_MOVE_CONSTEXPR constexpr
-#else
-#	define LIBBNDL_DEFAULT_MOVE_CONSTEXPR
-#endif
-
 #ifdef __cpp_lib_to_underlying
 #	define LIBBNDL_TO_UNDERLYING(x) std::to_underlying(x)
 #else
@@ -34,14 +28,14 @@ namespace libbndl
 
 	enum class Magic : uint8_t
 	{
-#define LIBBNDL_ENUM_MAGIC(name, _, value) name = value,
+#define LIBBNDL_ENUM_MAGIC(name, _, value) name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_MAGIC
 	};
 
 	enum class Platform : uint16_t
 	{
-#define LIBBNDL_ENUM_PLATFORM(name, _, value) name = value,
+#define LIBBNDL_ENUM_PLATFORM(name, _, value) name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_PLATFORM
 	};
@@ -52,7 +46,7 @@ namespace libbndl
 		{
 			enum : uint32_t
 			{
-#define LIBBNDL_ENUM_RESOURCE_TYPE_BURNOUT(name, _, value) name = value,
+#define LIBBNDL_ENUM_RESOURCE_TYPE_BURNOUT(name, _, value) name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_RESOURCE_TYPE_BURNOUT
 			};
@@ -62,7 +56,7 @@ namespace libbndl
 		{
 			enum : uint32_t
 			{
-#define LIBBNDL_ENUM_RESOURCE_TYPE_NFS(name, _, value) name = value,
+#define LIBBNDL_ENUM_RESOURCE_TYPE_NFS(name, _, value) name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_RESOURCE_TYPE_NFS
 			};
@@ -71,7 +65,7 @@ namespace libbndl
 
 	enum class MemoryType : uint8_t
 	{
-#define LIBBNDL_ENUM_MEMORY_TYPE(name, _, value) name = value,
+#define LIBBNDL_ENUM_MEMORY_TYPE(name, _, value) name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_MEMORY_TYPE
 	};
@@ -82,7 +76,7 @@ namespace libbndl
 		using UnderlyingType = uint32_t;
 		enum class Values : UnderlyingType
 		{
-#define LIBBNDL_ENUM_FLAGS(name, _, value) name = value,
+#define LIBBNDL_ENUM_FLAGS(name, _, value) name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_FLAGS
 		};
@@ -92,7 +86,6 @@ namespace libbndl
 
 		constexpr Flags() noexcept : m_value(0) {}
 		constexpr Flags(Values flag) noexcept : m_value(LIBBNDL_TO_UNDERLYING(flag)) {}
-		constexpr Flags(const Flags &flags) noexcept = default;
 		constexpr explicit Flags(UnderlyingType flags) noexcept : m_value(flags) {}
 
 		[[nodiscard]] constexpr bool operator==(const Flags &flags) const noexcept = default;
@@ -143,7 +136,7 @@ namespace libbndl
 	public:
 		enum class IDType : uint8_t
 		{
-#define LIBBNDL_ENUM_ID_TYPE(name, _, value) name = value,
+#define LIBBNDL_ENUM_ID_TYPE(name, _, value) name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_ID_TYPE
 		};
@@ -176,8 +169,8 @@ namespace libbndl
 	public:
 		constexpr ResourceDebugData(std::string name, std::string typeName) noexcept : m_name(std::move(name)), m_typeName(std::move(typeName)) {}
 
-		[[nodiscard]] constexpr std::string GetName() const noexcept { return m_name; }
-		[[nodiscard]] constexpr std::string GetTypeName() const noexcept { return m_typeName; }
+		[[nodiscard]] constexpr std::string GetName() const { return m_name; }
+		[[nodiscard]] constexpr std::string GetTypeName() const { return m_typeName; }
 
 	private:
 		std::string m_name;
@@ -189,7 +182,7 @@ namespace libbndl
 	public:
 		enum class ImportType : uint8_t
 		{
-#define LIBBNDL_ENUM_IMPORT_TYPE(name, _, value) name = value,
+#define LIBBNDL_ENUM_IMPORT_TYPE(name, _, value) name = (value),
 #include <libbndl/internal/enum.inc>
 #undef LIBBNDL_ENUM_IMPORT_TYPE
 		};
@@ -219,8 +212,18 @@ namespace libbndl
 		using const_iterator = const value_type *;
 
 		constexpr Buffer() noexcept : m_ptr({}), m_size(0), m_alignment(0) {}
-		Buffer(std::unique_ptr<value_type[]> ptr, size_type size, uint32_t alignment) noexcept : m_ptr(std::move(ptr)), m_size(size), m_alignment(alignment) {}
-		LIBBNDL_DEFAULT_MOVE_CONSTEXPR Buffer(Buffer &&other) noexcept = default;
+		LIBBNDL_BUFFER_CONSTEXPR Buffer(std::unique_ptr<value_type[]> ptr, size_type size, uint32_t alignment) noexcept : m_ptr(std::move(ptr)), m_size(size), m_alignment(alignment) {}
+		constexpr Buffer(const Buffer &) = delete;
+		constexpr Buffer &operator=(const Buffer &) = delete;
+		LIBBNDL_BUFFER_CONSTEXPR Buffer(Buffer &&) noexcept = default;
+		LIBBNDL_BUFFER_CONSTEXPR Buffer &operator=(Buffer &&buffer) noexcept
+		{
+			m_ptr = std::move(buffer.m_ptr);
+			m_size = buffer.m_size;
+			m_alignment = buffer.m_alignment;
+			return *this;
+		}
+		LIBBNDL_BUFFER_CONSTEXPR ~Buffer() = default;
 
 		[[nodiscard]] constexpr size_type GetSize() const noexcept { return m_size; }
 		[[nodiscard]] constexpr uint32_t GetAlignment() const noexcept { return m_alignment; }
@@ -233,13 +236,6 @@ namespace libbndl
 
 		[[nodiscard]] LIBBNDL_BUFFER_CONSTEXPR bool operator==(std::nullptr_t) const noexcept { return m_ptr.get() == nullptr; }
 		[[nodiscard]] LIBBNDL_BUFFER_CONSTEXPR reference operator[](size_type idx) const { return m_ptr[idx]; }
-
-		void operator=(Buffer &&buffer) noexcept
-		{
-			m_ptr = std::move(buffer.m_ptr);
-			m_size = buffer.m_size;
-			m_alignment = buffer.m_alignment;
-		}
 
 	private:
 		std::unique_ptr<value_type[]> m_ptr;
@@ -255,11 +251,11 @@ namespace libbndl
 
 		[[nodiscard]] constexpr Buffer &GetBinary(MemoryType block) { return m_buffers[LIBBNDL_TO_UNDERLYING(block)]; }
 		[[nodiscard]] constexpr const Buffer &GetBinary(MemoryType block) const { return m_buffers[LIBBNDL_TO_UNDERLYING(block)]; }
-		[[nodiscard]] constexpr std::vector<Import> GetImports() const noexcept { return m_imports; }
+		[[nodiscard]] constexpr std::vector<Import> GetImports() const { return m_imports; }
 		[[nodiscard]] constexpr uint32_t GetResourceType() const noexcept { return m_resourceType; }
 
 		void ReplaceBinary(MemoryType block, Buffer &&buffer) { m_buffers[LIBBNDL_TO_UNDERLYING(block)] = std::move(buffer); }
-		void AddImport(Import import) { m_imports.emplace_back(std::move(import)); }
+		void AddImport(Import import) { m_imports.emplace_back(import); }
 
 	private:
 		std::array<Buffer, 4> m_buffers;
@@ -272,6 +268,10 @@ namespace libbndl
 	public:
 		LIBBNDL_EXPORT Bundle();
 		LIBBNDL_EXPORT Bundle(Magic magic, uint16_t version, Platform platform, Flags flags);
+		Bundle(const Bundle &) = delete;
+		Bundle &operator=(const Bundle &) = delete;
+		LIBBNDL_EXPORT Bundle(Bundle &&) noexcept;
+		LIBBNDL_EXPORT Bundle &operator=(Bundle &&) noexcept;
 		LIBBNDL_EXPORT ~Bundle();
 
 		LIBBNDL_EXPORT bool Load(const std::filesystem::path &name);

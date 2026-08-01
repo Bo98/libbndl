@@ -12,54 +12,65 @@
 
 using namespace libbndl;
 
-static std::string cleanResourceNameForHash(const std::string &resourceName)
+namespace
 {
-	if (std::regex_search(resourceName, std::regex("^[a-zA-Z]:\\\\")))
+	std::string cleanResourceNameForHash(const std::string &resourceName)
 	{
-		return std::filesystem::path(resourceName).filename().string();
+		if (std::regex_search(resourceName, std::regex("^[a-zA-Z]:\\\\")))
+		{
+			return std::filesystem::path(resourceName).filename().string();
+		}
+
+		return resourceName;
 	}
 
-	return resourceName;
-}
-
-static std::string cleanResourceNameForIO(const std::string &resourceName)
-{
-	const auto gameDBStart = resourceName.find("gamedb://");
-	if (gameDBStart != std::string::npos)
+	std::string cleanResourceNameForIO(const std::string &resourceName)
 	{
-		const auto basenameStart = resourceName.find_last_of("/") + 1;
-		if (basenameStart < gameDBStart)
-			return resourceName;
-		auto basenameEnd = resourceName.find_first_of("?", basenameStart);
-		if (basenameEnd == std::string::npos)
-			basenameEnd = resourceName.find_first_of("#", basenameStart);
-		std::smatch match;
-		std::regex_search(resourceName.begin() + basenameEnd, resourceName.end(), match, std::regex("^(?:\\?ID=|#)\\d+"));
-		return resourceName.substr(0, gameDBStart) + resourceName.substr(basenameStart, basenameEnd - basenameStart) + match.suffix().str();
+		const auto gameDBStart = resourceName.find("gamedb://");
+		if (gameDBStart != std::string::npos)
+		{
+			const auto basenameStart = resourceName.find_last_of('/') + 1;
+			if (basenameStart < gameDBStart)
+				return resourceName;
+			auto basenameEnd = resourceName.find_first_of('?', basenameStart);
+			if (basenameEnd == std::string::npos)
+				basenameEnd = resourceName.find_first_of('#', basenameStart);
+
+			const auto prefix = resourceName.substr(0, gameDBStart);
+			if (basenameEnd == std::string::npos)
+				return prefix + resourceName.substr(basenameStart);
+
+			std::string_view suffix = resourceName;
+			suffix.remove_prefix(basenameEnd);
+
+			std::match_results<std::string_view::const_iterator> match;
+			std::regex_search(suffix.begin(), suffix.end(), match, std::regex("^(?:\\?ID=|#)\\d+"));
+			return prefix + resourceName.substr(basenameStart, basenameEnd - basenameStart) + match.suffix().str();
+		}
+
+		return cleanResourceNameForHash(resourceName);
 	}
 
-	return cleanResourceNameForHash(resourceName);
-}
-
-static std::string resourceIDToString(const ResourceID &resourceID)
-{
-	return std::format("0x{:0{}X}", static_cast<uint64_t>(resourceID), (resourceID.GetIDType() != ResourceID::IDType::Normal) ? 16 : 8);
-}
-
-static std::string getDebugName(const Bundle &arch, const std::optional<ResourceDebugData> &debugData, const std::string &fallback)
-{
-	if (debugData)
+	std::string resourceIDToString(const ResourceID &resourceID)
 	{
-		const auto cleanedName = cleanResourceNameForIO(debugData->GetName());
-
-		if (arch.GetResourceDebugData(ResourceID(cleanResourceNameForHash(debugData->GetName()))) && std::all_of(cleanedName.begin(), cleanedName.end(), [](char c) { return std::isalnum(c) || c == '.' || c == '-' || c == '_' || c == '~' || c == '(' || c == ')' || c == ',' || c == '+' || c == ' '; }))
-			return cleanedName;
+		return std::format("0x{:0{}X}", static_cast<uint64_t>(resourceID), (resourceID.GetIDType() != ResourceID::IDType::Normal) ? 16 : 8);
 	}
 
-	return fallback;
+	std::string getDebugName(const Bundle &arch, const std::optional<ResourceDebugData> &debugData, const std::string &fallback)
+	{
+		if (debugData)
+		{
+			const auto cleanedName = cleanResourceNameForIO(debugData->GetName());
+
+			if (arch.GetResourceDebugData(ResourceID(cleanResourceNameForHash(debugData->GetName()))) && std::ranges::all_of(cleanedName, [](char c) { return std::isalnum(c) || c == '.' || c == '-' || c == '_' || c == '~' || c == '(' || c == ')' || c == ',' || c == '+' || c == ' '; }))
+				return cleanedName;
+		}
+
+		return fallback;
+	}
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	cxxopts::Options options("bndl_util", "A program to work with Burnout Paradise bundle archives (BETA)");
 	options.add_options()
@@ -73,19 +84,19 @@ int main(int argc, char** argv)
 	auto parsedOptions = options.parse(argc, argv);
 	if (parsedOptions.count("file") == 0 && parsedOptions.count("all") == 0)
 	{
-		std::cout << "Please specify a bundle file." << std::endl << options.help() << std::endl;
+		std::cout << "Please specify a bundle file.\n" << options.help() << '\n';
 		return EXIT_FAILURE;
 	}
 
 	if (parsedOptions.count("file") > 0 && parsedOptions.count("all") > 0)
 	{
-		std::cout << "The --file and --all arguments are mutually exclusive." << std::endl;
+		std::cout << "The --file and --all arguments are mutually exclusive.\n";
 		return EXIT_FAILURE;
 	}
 
 	if (parsedOptions.count("all") > 0 && parsedOptions.count("extract") == 0)
 	{
-		std::cout << "--all can only be used in extract mode." << std::endl;
+		std::cout << "--all can only be used in extract mode.\n";
 		return EXIT_FAILURE;
 	}
 
@@ -101,8 +112,7 @@ int main(int argc, char** argv)
 	
 	if ((pack + extract + list + search) != 1)
 	{
-		std::cout << "Please specify exactly one operation that should be executed." << std::endl
-		<< options.help() << std::endl;
+		std::cout << "Please specify exactly one operation that should be executed.\n" << options.help() << '\n';
 		return EXIT_FAILURE;
 	}
 
@@ -113,12 +123,12 @@ int main(int argc, char** argv)
 		{
 			if (!arch.Load(file.value()))
 			{
-				std::cout << "Failed to open " << file.value() << std::endl;
+				std::cout << "Failed to open " << file.value() << '\n';
 				return EXIT_FAILURE;
 			}
 
 			std::cout.fill('-');
-			std::cout << std::left << std::setw(70) << "NAME" << std::right << "FILE TYPE" << std::endl;
+			std::cout << std::left << std::setw(70) << "NAME" << std::right << "FILE TYPE\n";
 			std::cout.fill(' ');
 			for (const auto &resourceID : arch.GetResourceIDs())
 			{
@@ -136,13 +146,13 @@ int main(int argc, char** argv)
 						typeName << debugData->GetTypeName();
 					else
 						typeName << std::hex << resourceType;
-					std::cout << std::left << std::setw(70) << name.str() << std::right << typeName.str() << std::endl;
+					std::cout << std::left << std::setw(70) << name.str() << std::right << typeName.str() << '\n';
 				}
 			}
 		}
 		else if (extract)
 		{
-			std::cout << "Extracting..." << std::endl;
+			std::cout << "Extracting...\n";
 
 			std::vector<std::filesystem::path> archives;
 			if (file)
@@ -158,7 +168,7 @@ int main(int argc, char** argv)
 				{
 					if (file)
 					{
-						std::cout << "Failed to open " << *file << std::endl;
+						std::cout << "Failed to open " << *file << '\n';
 						return EXIT_FAILURE;
 					}
 					continue;
@@ -176,7 +186,7 @@ int main(int argc, char** argv)
 				}
 				catch (std::filesystem::filesystem_error &e)
 				{
-					std::cout << "Failed to create extract directory: " << e.what() << std::endl;
+					std::cout << "Failed to create extract directory: " << e.what() << '\n';
 					return EXIT_FAILURE;
 				}
 
@@ -243,7 +253,7 @@ int main(int argc, char** argv)
 				}
 
 				std::ofstream manifest(archiveExtractDir / "_manifest.txt");
-				manifest << "# This is a mapping of IDs to file names for your information. This file is not used for bundle packing and does not need to exist." << std::endl;
+				manifest << "# This is a mapping of IDs to file names for your information. This file is not used for bundle packing and does not need to exist.\n";
 
 				for (const auto &resourceID : arch.GetResourceIDs())
 				{
@@ -275,7 +285,7 @@ int main(int argc, char** argv)
 						}
 						catch (std::filesystem::filesystem_error &e)
 						{
-							std::cout << "Failed to create directory: " << e.what() << std::endl;
+							std::cout << "Failed to create directory: " << e.what() << '\n';
 							return EXIT_FAILURE;
 						}
 
@@ -315,7 +325,7 @@ int main(int argc, char** argv)
 							outfile.write(reinterpret_cast<const char *>(buffer.GetData()), buffer.GetSize());
 							outfile.close();
 							if (outfile.fail())
-								std::cout << "Failed to create extract " << path << ": " << std::error_code(errno, std::generic_category()) << std::endl;
+								std::cout << "Failed to create extract " << path << ": " << std::error_code(errno, std::generic_category()) << '\n';
 						}
 
 						const auto &imports = data.GetImports();
@@ -361,7 +371,7 @@ int main(int argc, char** argv)
 							debugName = debugData->GetName();
 					}
 
-					manifest << idStr << " = " << debugName << std::endl;
+					manifest << idStr << " = " << debugName << '\n';
 				}
 
 				std::ofstream outfile(archiveExtractDir / "_config.xml");
@@ -373,14 +383,14 @@ int main(int argc, char** argv)
 	{
 		if (!std::filesystem::is_directory(packDir))
 		{
-			std::cout << "The path supplied for packing is not a directory." << std::endl;
+			std::cout << "The path supplied for packing is not a directory.\n";
 			return EXIT_FAILURE;
 		}
 
 		const auto configPath = packDir / "_config.xml";
 		if (!std::filesystem::is_regular_file(configPath) && !std::filesystem::is_symlink(configPath))
 		{
-			std::cout << "Could not find a _config.xml file in the directory to pack." << std::endl;
+			std::cout << "Could not find a _config.xml file in the directory to pack.\n";
 			return EXIT_FAILURE;
 		}
 
