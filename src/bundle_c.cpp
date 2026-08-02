@@ -1,6 +1,3 @@
-// The secure alternatives are non-standard - but the non-secure standard ones can still be used securely.
-#define _CRT_SECURE_NO_WARNINGS
-
 #include <libbndl/bundle.h>
 #include <algorithm>
 #include <cassert>
@@ -166,20 +163,34 @@ void libbndl_resource_debug_data_free(libbndl_resource_debug_data *LIBBNDL_NULLA
 
 libbndl_error libbndl_resource_debug_data_get_name(const libbndl_resource_debug_data *LIBBNDL_NONNULL debugData, char *LIBBNDL_NONNULL buffer, size_t length)
 {
-	const auto name = debugData->GetName();
+	if (length == 0)
+		return LIBBNDL_ERROR_SUCCESS;
 
-	std::strncpy(buffer, name.c_str(), length);
-	buffer[length - 1] = '\0';
+	const auto name = debugData->GetName();
+	const auto size = name.size();
+
+	if (size >= length)
+		return LIBBNDL_INSUFFICIENT_BUFFER;
+
+	std::memcpy(buffer, name.data(), size);
+	buffer[size] = '\0';
 
 	return LIBBNDL_ERROR_SUCCESS;
 }
 
 libbndl_error libbndl_resource_debug_data_get_type_name(const libbndl_resource_debug_data *LIBBNDL_NONNULL debugData, char *LIBBNDL_NONNULL buffer, size_t length)
 {
-	const auto typeName = debugData->GetTypeName();
+	if (length == 0)
+		return LIBBNDL_ERROR_SUCCESS;
 
-	std::strncpy(buffer, typeName.c_str(), length);
-	buffer[length - 1] = '\0';
+	const auto typeName = debugData->GetTypeName();
+	const auto size = typeName.size();
+
+	if (size >= length)
+		return LIBBNDL_INSUFFICIENT_BUFFER;
+
+	std::memcpy(buffer, typeName.data(), size);
+	buffer[size] = '\0';
 
 	return LIBBNDL_ERROR_SUCCESS;
 }
@@ -461,8 +472,17 @@ int32_t libbndl_get_default_resource_stream_index(const libbndl_bundle *LIBBNDL_
 
 libbndl_error libbndl_get_stream_name(const libbndl_bundle *LIBBNDL_NONNULL bundle, char *LIBBNDL_NONNULL buffer, size_t length, uint8_t streamIndex)
 {
+	if (length == 0)
+		return LIBBNDL_ERROR_SUCCESS;
+
 	const auto streamName = bundle->GetStreamName(streamIndex);
-	std::strncpy(buffer, streamName.c_str(), length);
+	const auto size = streamName.size();
+
+	if (size >= length)
+		return LIBBNDL_INSUFFICIENT_BUFFER;
+
+	std::memcpy(buffer, streamName.data(), size);
+	buffer[size] = '\0';
 
 	return LIBBNDL_ERROR_SUCCESS;
 }

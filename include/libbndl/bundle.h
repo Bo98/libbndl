@@ -37,6 +37,7 @@ extern "C"
 		LIBBNDL_ERROR_RESOURCE_NOT_FOUND = 3,
 		LIBBNDL_ERROR_DEBUG_DATA_NOT_FOUND = 4,
 		LIBBNDL_ERROR_OUT_OF_RANGE = 5,
+		LIBBNDL_INSUFFICIENT_BUFFER = 6,
 
 		LIBBNDL_ERROR_MEMORY_ALLOCATION = -1,
 	} libbndl_error;
@@ -210,6 +211,7 @@ extern "C"
 	LIBBNDL_EXPORT int32_t libbndl_get_default_resource_stream_index(const libbndl_bundle *LIBBNDL_NONNULL bundle);
 
 #	define LIBBNDL_STREAM_NAME_MAX_LENGTH 15
+#	define LIBBNDL_STREAM_NAME_BUFFER_SIZE (LIBBNDL_STREAM_NAME_MAX_LENGTH + 1)
 	LIBBNDL_EXPORT libbndl_error libbndl_get_stream_name(const libbndl_bundle *LIBBNDL_NONNULL bundle, char *LIBBNDL_NONNULL buffer, size_t length, uint8_t streamIndex);
 
 	LIBBNDL_EXPORT bool libbndl_is_valid_memory_type(const libbndl_bundle *LIBBNDL_NONNULL bundle, libbndl_memory_type memoryType);
