@@ -19,7 +19,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -28,11 +28,6 @@ jobs:
         uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
           arch: x64
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: 6.*
 
       - name: Build
         shell: bash
@@ -50,7 +45,7 @@ jobs:
           cmake --build build
           cmake --install build
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: libbndl-${{ matrix.build_type }}-${{ matrix.os }}
           path: install/*
