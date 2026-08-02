@@ -421,6 +421,9 @@ libbndl_error libbndl_add_resource(libbndl_bundle *LIBBNDL_NONNULL bundle, libbn
 {
 	assert(resource != nullptr);
 
+	if (streamIndex >= LIBBNDL_STREAM_MAX_COUNT)
+		return LIBBNDL_ERROR_OUT_OF_RANGE;
+
 	if (!bundle->AddResource(ResourceID(resourceID), *resource, streamIndex))
 		return LIBBNDL_ERROR_GENERIC_FAILURE;
 
@@ -430,6 +433,9 @@ libbndl_error libbndl_add_resource(libbndl_bundle *LIBBNDL_NONNULL bundle, libbn
 libbndl_error libbndl_replace_resource(libbndl_bundle *LIBBNDL_NONNULL bundle, libbndl_resource_id resourceID, const libbndl_resource *LIBBNDL_NONNULL resource, uint8_t streamIndex)
 {
 	assert(resource != nullptr);
+
+	if (streamIndex >= LIBBNDL_STREAM_MAX_COUNT)
+		return LIBBNDL_ERROR_OUT_OF_RANGE;
 
 	if (!bundle->ReplaceResource(ResourceID(resourceID), *resource, streamIndex))
 		return LIBBNDL_ERROR_GENERIC_FAILURE;
