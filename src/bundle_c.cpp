@@ -170,7 +170,7 @@ libbndl_error libbndl_resource_debug_data_get_name(const libbndl_resource_debug_
 	const auto size = name.size();
 
 	if (size >= length)
-		return LIBBNDL_INSUFFICIENT_BUFFER;
+		return LIBBNDL_ERROR_INSUFFICIENT_BUFFER;
 
 	std::memcpy(buffer, name.data(), size);
 	buffer[size] = '\0';
@@ -187,7 +187,7 @@ libbndl_error libbndl_resource_debug_data_get_type_name(const libbndl_resource_d
 	const auto size = typeName.size();
 
 	if (size >= length)
-		return LIBBNDL_INSUFFICIENT_BUFFER;
+		return LIBBNDL_ERROR_INSUFFICIENT_BUFFER;
 
 	std::memcpy(buffer, typeName.data(), size);
 	buffer[size] = '\0';
@@ -485,7 +485,7 @@ libbndl_error libbndl_get_stream_name(const libbndl_bundle *LIBBNDL_NONNULL bund
 	const auto size = streamName.size();
 
 	if (size >= length)
-		return LIBBNDL_INSUFFICIENT_BUFFER;
+		return LIBBNDL_ERROR_INSUFFICIENT_BUFFER;
 
 	std::memcpy(buffer, streamName.data(), size);
 	buffer[size] = '\0';
