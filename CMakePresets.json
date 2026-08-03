@@ -2,18 +2,6 @@
   "version": 9,
   "configurePresets": [
     {
-      "hidden": true,
-      "name": "Qt",
-      "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{QTDIR}"
-      },
-      "vendor": {
-        "qt-project.org/Qt": {
-          "checksum": "wVa86FgEkvdCTVp1/nxvrkaemJc="
-        }
-      }
-    },
-    {
       "name": "base",
       "hidden": true,
       "binaryDir": "${sourceDir}/out/build/${presetName}",
@@ -33,15 +21,6 @@
       },
       "environment": {
         "CAExcludePath": "${sourceDir}/out/build/${presetName}/_deps"
-      }
-    },
-    {
-      "name": "ui",
-      "hidden": true,
-      "inherits": "Qt",
-      "cacheVariables": {
-        "LIBBNDL_BUILD_UI": "ON",
-        "LIBBNDL_INSTALL_UI": "ON"
       }
     },
     {
@@ -98,22 +77,6 @@
       ]
     },
     {
-      "name": "x64-debug-windows-ui",
-      "displayName": "x64 Debug (UI)",
-      "inherits": [
-        "x64-debug-windows",
-        "ui"
-      ]
-    },
-    {
-      "name": "x64-debug-unix-ui",
-      "displayName": "x64 Debug (UI)",
-      "inherits": [
-        "x64-debug-unix",
-        "ui"
-      ]
-    },
-    {
       "name": "x64-release",
       "hidden": true,
       "inherits": "x64-debug",
@@ -135,22 +98,6 @@
       "inherits": [
         "x64-release",
         "unix-base"
-      ]
-    },
-    {
-      "name": "x64-release-windows-ui",
-      "displayName": "x64 Release (UI)",
-      "inherits": [
-        "x64-release-windows",
-        "ui"
-      ]
-    },
-    {
-      "name": "x64-release-unix-ui",
-      "displayName": "x64 Release (UI)",
-      "inherits": [
-        "x64-release-unix",
-        "ui"
       ]
     },
     {
@@ -181,22 +128,6 @@
       ]
     },
     {
-      "name": "x86-debug-windows-ui",
-      "displayName": "x86 Debug (UI)",
-      "inherits": [
-        "x86-debug-windows",
-        "ui"
-      ]
-    },
-    {
-      "name": "x86-debug-unix-ui",
-      "displayName": "x86 Debug (UI)",
-      "inherits": [
-        "x86-debug-unix",
-        "ui"
-      ]
-    },
-    {
       "name": "x86-release",
       "hidden": true,
       "inherits": "x86-debug",
@@ -218,22 +149,6 @@
       "inherits": [
         "x86-release",
         "unix-base"
-      ]
-    },
-    {
-      "name": "x86-release-windows-ui",
-      "displayName": "x86 Release (UI)",
-      "inherits": [
-        "x86-release-windows",
-        "ui"
-      ]
-    },
-    {
-      "name": "x86-release-unix-ui",
-      "displayName": "x86 Release (UI)",
-      "inherits": [
-        "x86-release-unix",
-        "ui"
       ]
     },
     {
@@ -264,22 +179,6 @@
       ]
     },
     {
-      "name": "arm64-debug-windows-ui",
-      "displayName": "arm64 Debug (UI)",
-      "inherits": [
-        "arm64-debug-windows",
-        "ui"
-      ]
-    },
-    {
-      "name": "arm64-debug-unix-ui",
-      "displayName": "arm64 Debug (UI)",
-      "inherits": [
-        "arm64-debug-unix",
-        "ui"
-      ]
-    },
-    {
       "name": "arm64-release",
       "hidden": true,
       "inherits": "arm64-debug",
@@ -301,22 +200,6 @@
       "inherits": [
         "arm64-release",
         "unix-base"
-      ]
-    },
-    {
-      "name": "arm64-release-windows-ui",
-      "displayName": "arm64 Release (UI)",
-      "inherits": [
-        "arm64-release-windows",
-        "ui"
-      ]
-    },
-    {
-      "name": "arm64-release-unix-ui",
-      "displayName": "arm64 Release (UI)",
-      "inherits": [
-        "arm64-release-unix",
-        "ui"
       ]
     }
   ],
@@ -525,10 +408,5 @@
       "inherits": "unix-base",
       "configurePreset": "arm64-release-unix"
     }
-  ],
-  "vendor": {
-    "qt-project.org/Presets": {
-      "checksum": "9ZhmNRipVo0D73DBdn2wVCPt4p4="
-    }
-  }
+  ]
 }
